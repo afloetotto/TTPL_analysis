@@ -761,6 +761,14 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
             von der Temperatur aus der Halbwertsbreite ab.
             """ % (abweichung, fehler)
         )
+    if T < 4.2:
+        warnings.warn(
+        datei +
+        """
+        : Die Probentemperatur vom Fit ist kleiner als 4.2 K. Da stimmt was
+        nicht!
+        """
+        )
 
     print('T =', T)
     print('T aus Halbwertsbreite =', T_FWHM)
@@ -806,7 +814,7 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
             # Silizium Peak wie bei Pelant
             vals = SiPeaks(E, Amps[i], sigmas[i], x0s[i], Delta, sigma_faltung)
             fitvals_einzeln.append(vals)
-            ax2.plot(E, vals, '-.', label='Si-Peaks (%.3f K)' % T,
+            ax2.plot(E, vals, '-.', label='Si-Peaks (%.1f K)' % T,
                      lw=lbreite)
         elif peakarten[i] == 'L':
             # lorentzförmiger Peak
