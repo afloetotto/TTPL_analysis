@@ -52,7 +52,7 @@ def gauss(x, Amp, sigma, x0):
         Position (Energie) des Maximums
     '''
 
-    sigma_neu = sigma / np.sqrt(8*np.log(2))  # Damit das eingebene sigma
+    sigma_neu = sigma / np.sqrt(8 * np.log(2))  # Damit das eingebene sigma
     # der Halbwertsbreite entspricht
 
     return Amp * np.exp(-(x - x0)**2 / 2 / sigma_neu**2)
@@ -78,7 +78,7 @@ def lorentz(x, Amp, sigma, x0):
         Position (Energie) des Maximums
     '''
 
-    Amp_neu = Amp * sigma**2 / 4    # Damit die eingebene Amp dem maximalen
+    Amp_neu = Amp * sigma**2 / 4  # Damit die eingebene Amp dem maximalen
     # Wert entspricht
     return Amp_neu / ((x - x0)**2 + sigma**2 / 4)
 
@@ -110,8 +110,8 @@ def maxwellboltzmann_quadr(x, Amp, sigma, x0):
     werte = np.zeros(n)
     for i in range(n):
         if x[i] > x0_neu:
-            werte[i] = Amp_neu * np.exp(-(x[i]-x0_neu)/sigma_neu) * (x[i] -
-                                                                     x0_neu)**2
+            werte[i] = Amp_neu * np.exp(
+                -(x[i] - x0_neu) / sigma_neu) * (x[i] - x0_neu)**2
     return werte
 
 
@@ -148,16 +148,15 @@ def maxwellboltzmann_wurz(x, Amp, sigma, x0, sigma_faltung=-1):
     fitfunc = np.zeros(n)
     for i in range(n):
         if x[i] > x0:
-            fitfunc[i] = np.exp(-(x[i]-x0)/sigma) *\
-                np.sqrt(x[i] - x0)
+            fitfunc[i] = np.exp(-(x[i] - x0) / sigma) * np.sqrt(x[i] - x0)
 
     if sigma_faltung <= 0:
         return fitfunc * Amp / max(fitfunc)
     else:
         delta_E = x[1] - x[0]
         faltfunc = signal.windows.gaussian(1000, sigma_faltung / delta_E)
-        faltung = signal.convolve(fitfunc, faltfunc, mode='same') /\
-                sum(faltfunc)
+        faltung = signal.convolve(fitfunc, faltfunc,
+                                  mode='same') / sum(faltfunc)
         return faltung * Amp / max(faltung)
 
 
@@ -197,7 +196,10 @@ def SiPeaks(x, Ampver, sigma, x0, Delta, sigma_faltung):
         ILO: List
     '''
     ITO = maxwellboltzmann_wurz(x, 1, sigma, x0, sigma_faltung=sigma_faltung)
-    ILO = maxwellboltzmann_wurz(x, Ampver, sigma, x0+Delta,
+    ILO = maxwellboltzmann_wurz(x,
+                                Ampver,
+                                sigma,
+                                x0 + Delta,
                                 sigma_faltung=sigma_faltung)
     Spektrum = ITO + ILO
 
@@ -240,10 +242,9 @@ def gebundene_exzitonen(x, Amp, sigma, x0, sigma_faltung):
     else:
         delta_E = x[1] - x[0]
         faltfunc = signal.windows.gaussian(1000, sigma_faltung / delta_E)
-        faltung = signal.convolve(fitfunc, faltfunc, mode='same') /\
-                sum(faltfunc)
+        faltung = signal.convolve(fitfunc, faltfunc,
+                                  mode='same') / sum(faltfunc)
         return faltung * Amp / max(faltung)
-
 
 
 def import_spektrum(datei, Npeaks, ITO_pos, roi, basekorr):
@@ -296,13 +297,26 @@ def import_spektrum(datei, Npeaks, ITO_pos, roi, basekorr):
     return E, I
 
 
-def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
-                       benutze_fit, smooth=(9, 6), x0_diff=1, x0_puffer=1,
-                       peakpos=None, Delta=2e-3, peakpos_vergleich=None,
-                       T_vergleich=None, export=False, roi_fenster=0,
+def einzelnes_spektrum(datei,
+                       peakarten,
+                       ITO_pos,
+                       BTO_pos,
+                       roi,
+                       P_pos,
+                       benutze_fit,
+                       smooth=(9, 6),
+                       x0_diff=1,
+                       x0_puffer=1,
+                       peakpos=None,
+                       Delta=2e-3,
+                       peakpos_vergleich=None,
+                       T_vergleich=None,
+                       export=False,
+                       roi_fenster=0,
                        ILO_ratio_grenzen=(0, 1),
                        sigma_faltung_interval=(8e-5, 3e-4),
-                       E_int=(-np.inf, np.inf), T_start=25):
+                       E_int=(-np.inf, np.inf),
+                       T_start=25):
     '''
     Wertet ein TTPL-Spektrum aus. Das Spektrum und die Fitfunktion werden
     gezeichnet und in einer pdf-Datei gespeichert. Diese pdf-Datei hat den
@@ -445,12 +459,16 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
     peaks_alle, properties = signal.find_peaks(I, prominence=10)
     peakproms_alle = properties['prominences']
     if len(peakproms_alle) < Npeaks:
-        warnings.warn(datei + " Es wurden weniger Peaks gefunden als die Anzahl vorgegebener Peaks. Evtl. muss das Argument prominence von scipy.signal.find_peaks() angepasst werden.")
+        warnings.warn(
+            datei +
+            " Es wurden weniger Peaks gefunden als die Anzahl vorgegebener Peaks. Evtl. muss das Argument prominence von scipy.signal.find_peaks() angepasst werden."
+        )
 
     if peakpos != None:
         # Hat signal.find_peaks() in der Nähe der Vorgaben Peaks gefunden?
         if len(peakpos) != Npeaks:
-            raise Exception("Laengen von peakpos und peakarten stimmen nicht ueberein.")
+            raise Exception(
+                "Laengen von peakpos und peakarten stimmen nicht ueberein.")
         peaks = []
         peakproms = []
         order = np.argsort(peakpos)
@@ -555,7 +573,9 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
             num = len(params) / 3
 
         if num != np.round(num):
-            raise Exception('Anzahl der params muss durch 3 teilbar sein (siehe docstring)')
+            raise Exception(
+                'Anzahl der params muss durch 3 teilbar sein (siehe docstring)'
+            )
         else:
             Npeaks = int(num)
 
@@ -563,7 +583,7 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
         for i in range(Npeaks):
             A = params[i]
             sigma = params[i + Npeaks]
-            x0 = params[i + 2*Npeaks]
+            x0 = params[i + 2 * Npeaks]
             if peakarten[i] == 'G':
                 # gaußförmiger Peak
                 wert += gauss(x, A, sigma, x0)
@@ -583,10 +603,11 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
                 # Bound-Exciton-Peak
                 wert += gebundene_exzitonen(x, A, sigma, x0, sigma_faltung)
             else:
-                raise Exception('Nur die folgenden peakarten sind verfuegbar: G, L, Q, W, B (siehe Docstring)')
+                raise Exception(
+                    'Nur die folgenden peakarten sind verfuegbar: G, L, Q, W, B (siehe Docstring)'
+                )
 
         return wert
-
 
     # Lege die Grenze der Parameter während des Fits fest und formatiere sie so
     # wie in der Doku von scipy.optimize.curve_fit() beschrieben
@@ -600,10 +621,9 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
             grenzen_max[i] = ILO_ratio_grenzen[1]
 
     grenzen_min = np.append(grenzen_min, [1e-6] * Npeaks)  # Sigma
-    grenzen_max = np.append(grenzen_max,
-                            (3 * sigma_start).tolist())
+    grenzen_max = np.append(grenzen_max, (3 * sigma_start).tolist())
     grenzen_min = np.append(grenzen_min,
-                             [pos - x0_diff for pos in x0_start])  # x0
+                            [pos - x0_diff for pos in x0_start])  # x0
     grenzen_max = np.append(grenzen_max, [pos + x0_diff for pos in x0_start])
     if 'S' in peakarten or 'B' in peakarten:
         # Grenzen für sigma_faltung
@@ -614,17 +634,21 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
     grenzen = (grenzen_min, grenzen_max)
 
     # Fitte das Spektrum
-    popt, pcov = optimize.curve_fit(fitfunc, E, I, p0=startparams,
-                                    bounds=grenzen, maxfev=100000)
+    popt, pcov = optimize.curve_fit(fitfunc,
+                                    E,
+                                    I,
+                                    p0=startparams,
+                                    bounds=grenzen,
+                                    maxfev=100000)
     # popt = startparams
     # pcov = np.zeros((len(startparams), len(startparams)))
 
-    perr = np.sqrt(np.diag(pcov))   # Fehler der Parameter
+    perr = np.sqrt(np.diag(pcov))  # Fehler der Parameter
     Amps = popt[0:Npeaks]
-    sigmas = popt[Npeaks:2*Npeaks]
-    sigmas_err = perr[Npeaks:2*Npeaks]
+    sigmas = popt[Npeaks:2 * Npeaks]
+    sigmas_err = perr[Npeaks:2 * Npeaks]
     sigmas = [abs(val) for val in sigmas]
-    x0s = popt[2*Npeaks:3*Npeaks]
+    x0s = popt[2 * Npeaks:3 * Npeaks]
     if 'S' in peakarten or 'B' in peakarten:
         sigma_faltung = popt[-1]
         print('sigma_faltung:', sigma_faltung)
@@ -645,19 +669,25 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
         ITO_Linie = True
     else:
         ITO_Linie = False
-        warnings.warn(datei + ": Keine ITO-Linie nahe der angegebenen Position gefunden. Da die Temperatur so nicht aus dem Spektrum bestimmt werden kann, kann peakpos_vergleich vor der Kalibrierung nicht auf die richtige Temperatur umgerechnet werden.")
+        warnings.warn(
+            datei +
+            ": Keine ITO-Linie nahe der angegebenen Position gefunden. Da die Temperatur so nicht aus dem Spektrum bestimmt werden kann, kann peakpos_vergleich vor der Kalibrierung nicht auf die richtige Temperatur umgerechnet werden."
+        )
 
     if x0s[BTO_index] - BTO_pos <= puffer:
         BTO_Linie = True
-    else: BTO_Linie = False
+    else:
+        BTO_Linie = False
 
     if ITO_Linie and ITO_index < len(peaks) - 1:
         ILO_Linie = True
-    else: ILO_Linie = False
+    else:
+        ILO_Linie = False
 
     if x0s[P_index] - P_pos <= puffer:
         P_Linie = True
-    else: P_Linie = False
+    else:
+        P_Linie = False
 
     # Berechne weitere Eigenschaften des Spektrums
     print('ILO-Verhaeltnis:', Amps[ITO_index])
@@ -670,15 +700,13 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
         if ITO_Linie:
             ITO_Halbwertsbreite = sigmas[ITO_index]
             if peakarten[ITO_index] in ['S', 'Q', 'W']:
-                T = ITO_Halbwertsbreite / 3.4 / constants.Boltzmann *\
-                        constants.e
-                Terr = sigmas_err[ITO_index] / 3.4 / constants.Boltzmann *\
-                        constants.e
+                T = ITO_Halbwertsbreite / 3.4 / constants.Boltzmann * constants.e
+                Terr = sigmas_err[
+                    ITO_index] / 3.4 / constants.Boltzmann * constants.e
             else:
-                T = ITO_Halbwertsbreite / 1.8 / constants.Boltzmann *\
-                        constants.e
-                Terr = sigmas_err[ITO_index] / 1.8 / constants.Boltzmann *\
-                        constants.e
+                T = ITO_Halbwertsbreite / 1.8 / constants.Boltzmann * constants.e
+                Terr = sigmas_err[
+                    ITO_index] / 1.8 / constants.Boltzmann * constants.e
         else:
             ITO_Halbwertsbreite = 0
             T = -1
@@ -706,15 +734,13 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
         if ITO_Linie:
             ITO_Halbwertsbreite = abs(peakbreiten[ITO_index])
             if peakarten[ITO_index] in ['S', 'Q', 'W']:
-                T = sigmas[ITO_index] / 3.4 / constants.Boltzmann *\
-                        constants.e
-                Terr = sigmas_err[ITO_index] / 3.4 / constants.Boltzmann *\
-                        constants.e
+                T = sigmas[ITO_index] / 3.4 / constants.Boltzmann * constants.e
+                Terr = sigmas_err[
+                    ITO_index] / 3.4 / constants.Boltzmann * constants.e
             else:
-                T = ITO_Halbwertsbreite / 1.8 / constants.Boltzmann *\
-                        constants.e
-                Terr = sigmas_err[ITO_index] / 1.8 / constants.Boltzmann *\
-                        constants.e
+                T = ITO_Halbwertsbreite / 1.8 / constants.Boltzmann * constants.e
+                Terr = sigmas_err[
+                    ITO_index] / 1.8 / constants.Boltzmann * constants.e
         else:
             ITO_Halbwertsbreite = 0
             T = -1
@@ -737,9 +763,10 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
 
     # Kalibriere die Energie-Achse des Spektrums mithilfe der Vergleichswerte
     if len(peakpos_vergleich) > 1:
-        slope, intercept = TTPL_Kalibrierung.kalibrier(
-            x0s, peakpos_vergleich, T=T, T_vergleich=T_vergleich
-        )
+        slope, intercept = TTPL_Kalibrierung.kalibrier(x0s,
+                                                       peakpos_vergleich,
+                                                       T=T,
+                                                       T_vergleich=T_vergleich)
         E = [slope * ele + intercept for ele in E]
         x0s = [slope * ele + intercept for ele in x0s]
         sigmas = [slope * ele for ele in sigmas]
@@ -747,28 +774,29 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
         T *= slope
         T_FWHM *= slope
         sigma_faltung *= slope
+        if ITO_Linie: x0_ITO = x0s[ITO_index]
+        else: x0_ITO = -1
+        if BTO_Linie: x0_BTO = x0s[BTO_index]
+        else: x0_BTO = -1
     else:
-        warnings.warn(datei + ': Es konnte keine Kalibrierung durchgefuehrt werden, weil nicht mindestens 2 Peaks nahe der angegeben Werte gefunden wurden.')
+        warnings.warn(
+            datei +
+            ': Es konnte keine Kalibrierung durchgefuehrt werden, weil nicht mindestens 2 Peaks nahe der angegeben Werte gefunden wurden.'
+        )
 
     # Vergleiche das T aus dem Fit mit dem T aus der FWHM
     abweichung = 10  # in %
     fehler = abs(T / T_FWHM - 1) * 100
     if fehler > abweichung:
-        warnings.warn(
-            datei +
-            """
+        warnings.warn(datei + """
             : Die Temperatur vom Fit weicht mehr als %d%% (%.2f%%)
             von der Temperatur aus der Halbwertsbreite ab.
-            """ % (abweichung, fehler)
-        )
+            """ % (abweichung, fehler))
     if T < 4.2:
-        warnings.warn(
-        datei +
-        """
+        warnings.warn(datei + """
         : Die Probentemperatur vom Fit ist kleiner als 4.2 K. Da stimmt was
         nicht!
-        """
-        )
+        """)
 
     print('T =', T)
     print('T aus Halbwertsbreite =', T_FWHM)
@@ -802,20 +830,25 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
             # Maxwell-Boltzmann Peak mit quadratischem Anteil
             vals = maxwellboltzmann_quadr(E, Amps[i], sigmas[i], x0s[i])
             fitvals_einzeln.append(vals)
-            ax2.plot(E, vals, '-.', label='Maxwell-Boltzmann (Quadrat)',
+            ax2.plot(E,
+                     vals,
+                     '-.',
+                     label='Maxwell-Boltzmann (Quadrat)',
                      lw=lbreite)
         elif peakarten[i] == 'W':
             # Maxwell-Boltzmann Peak mit wurzelförmigem Anteil
             vals = maxwellboltzmann_wurz(E, Amps[i], sigmas[i], x0s[i])
             fitvals_einzeln.append(vals)
-            ax2.plot(E, vals, '-.', label='Maxwell-Boltzmann (Wurzel)',
+            ax2.plot(E,
+                     vals,
+                     '-.',
+                     label='Maxwell-Boltzmann (Wurzel)',
                      lw=lbreite)
         elif peakarten[i] == 'S':
             # Silizium Peak wie bei Pelant
             vals = SiPeaks(E, Amps[i], sigmas[i], x0s[i], Delta, sigma_faltung)
             fitvals_einzeln.append(vals)
-            ax2.plot(E, vals, '-.', label='Si-Peaks (%.1f K)' % T,
-                     lw=lbreite)
+            ax2.plot(E, vals, '-.', label='Si-Peaks (%.1f K)' % T, lw=lbreite)
         elif peakarten[i] == 'L':
             # lorentzförmiger Peak
             vals = lorentz(E, Amps[i], sigmas[i], x0s[i])
@@ -832,16 +865,16 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
 
     # Kennzeichne die Peaks
     # if ITO_Linie:
-        # ax.annotate('ITO', xy=(x0s[ITO_index], fitvals[peaks[ITO_index]]))
+    # ax.annotate('ITO', xy=(x0s[ITO_index], fitvals[peaks[ITO_index]]))
 
     # if BTO_Linie:
-        # ax.annotate('BTO', xy=(x0s[BTO_index], fitvals[peaks[BTO_index]]))
+    # ax.annotate('BTO', xy=(x0s[BTO_index], fitvals[peaks[BTO_index]]))
 
     # if ILO_Linie:
-        # ax.annotate('ILO', xy=(x0s[ITO_index+1], fitvals[peaks[ITO_index+1]]))
+    # ax.annotate('ILO', xy=(x0s[ITO_index+1], fitvals[peaks[ITO_index+1]]))
 
     # if P_Linie:
-        # ax.annotate('P-Linie', xy=(x0s[P_index], fitvals[peaks[P_index]]))
+    # ax.annotate('P-Linie', xy=(x0s[P_index], fitvals[peaks[P_index]]))
 
     # Speichere den Plot
     fname = os.path.splitext(datei)[0]
@@ -861,13 +894,12 @@ def einzelnes_spektrum(datei, peakarten, ITO_pos, BTO_pos, roi, P_pos,
         df['Temperatur'] = [T] * len(E)
         df.to_csv(fname + '_Daten.csv', index=False)
 
-    return Intver, ITO_Peakheight_roh, sigma_faltung, P_Intvers, ILO_Halbwertsbreite, T, Terr
+    return Intver, ITO_Peakheight_roh, sigma_faltung, P_Intvers, ILO_Halbwertsbreite, T, Terr, x0_BTO, x0_ITO
 
 
 def test_filetype(ftype):
     '''
     Testet, ob eine Datei die Endung einer Messdatei hat.
-
     Das LabView Programm speichert die Messung in einer .xls Datei, die
     dann noch in eine .xlsx Datei umgewandelt werden muss damit man sie
     importieren kann (Die Funktion pandas.read_excel() unterstützt zwar
@@ -914,9 +946,10 @@ def auswertung(ordner, parameter):
 
     # Erstelle eine Liste mit allen Dateien im Ordner
     dirlist = os.listdir(ordner)
-    dateien = np.array([f for f in dirlist if
-                        os.path.isfile(os.path.join(ordner, f)) and
-                        test_filetype(os.path.splitext(f)[1])])
+    dateien = np.array([
+        f for f in dirlist if os.path.isfile(os.path.join(ordner, f))
+        and test_filetype(os.path.splitext(f)[1])
+    ])
 
     # Wechsle in den Ordner
     ordner_urspruenglich = os.getcwd()
@@ -925,13 +958,13 @@ def auswertung(ordner, parameter):
     # Sortiere Dateien aus, die nicht ausgewertet werden sollen
     # dateien_auswahl = []
     # for ele in dateien:
-        # # Sortiere Messungen mit 150er oder 600er Gitter aus
-        # test1 = not(re.search('_\d\d\d.asc', ele))
-        # # Sortiere Messungen an W1 und W2 aus
-        # test2 = not(re.search('W1_', ele))
-        # test3 = not(re.search('W2_', ele))
-        # if test1 and test2 and test3:
-            # dateien_auswahl.append(ele)
+    # # Sortiere Messungen mit 150er oder 600er Gitter aus
+    # test1 = not(re.search('_\d\d\d.asc', ele))
+    # # Sortiere Messungen an W1 und W2 aus
+    # test2 = not(re.search('W1_', ele))
+    # test3 = not(re.search('W2_', ele))
+    # if test1 and test2 and test3:
+    # dateien_auswahl.append(ele)
     # dateien = dateien_auswahl
     # warnings.warn('Es werden nur bestimmte Messdateien ausgewertet. Siehe TTPL.py fuer die Kriterien')
 
@@ -964,18 +997,30 @@ def auswertung(ordner, parameter):
     ILO_Halbwertsbreite = np.zeros(n)
     T = np.zeros(n)
     Terr = np.zeros(n)
+    x0_BTO = np.zeros(n)
+    x0_ITO = np.zeros(n)
 
     for i in range(n):
-        dmy = einzelnes_spektrum(dateien[i], peakarten, ITO_pos, BTO_pos, roi,
-                                 P_pos, benutze_fit, smooth=smooth,
-                                 x0_diff=x0_diff, x0_puffer=x0_puffer,
-                                 peakpos=peakpos, Delta=Delta,
+        dmy = einzelnes_spektrum(dateien[i],
+                                 peakarten,
+                                 ITO_pos,
+                                 BTO_pos,
+                                 roi,
+                                 P_pos,
+                                 benutze_fit,
+                                 smooth=smooth,
+                                 x0_diff=x0_diff,
+                                 x0_puffer=x0_puffer,
+                                 peakpos=peakpos,
+                                 Delta=Delta,
                                  peakpos_vergleich=peakpos_vergleich,
-                                 T_vergleich=T_vergleich, export=export,
+                                 T_vergleich=T_vergleich,
+                                 export=export,
                                  roi_fenster=roi_fenster,
                                  ILO_ratio_grenzen=ILO_ratio_grenzen,
                                  sigma_faltung_interval=sigma_faltung_interval,
-                                 E_int=E_int, T_start=T_start)
+                                 E_int=E_int,
+                                 T_start=T_start)
         Intvers[i] = dmy[0]
         ITO_FWHMs[i] = dmy[1]
         sigma_faltungs[i] = dmy[2]
@@ -983,21 +1028,24 @@ def auswertung(ordner, parameter):
         ILO_Halbwertsbreite[i] = dmy[4]
         T[i] = dmy[5]
         Terr[i] = dmy[6]
-
+        x0_BTO[i] = dmy[7]
+        x0_ITO[i] = dmy[8]
 
     # Speichere die Ergebnisse in einer csv-Datei:
     AuswertungFname = os.path.basename(ordner) + '_Auswertung.csv'
     f = open(AuswertungFname, 'w')
     writer = csv.writer(f, lineterminator='\n', delimiter=';')
-    writer.writerow(
-        ['Datei', 'BTO/ITO Intensitätsverhältnis', 'ITO Höhe roh',
-         'sigma Faltung', 'P/ITO Intensitätsverhältnis',
-         'ILO Halbwertsbreite', 'T', 'Delta T']
-    )
+    writer.writerow([
+        'Datei', 'BTO/ITO Intensitätsverhältnis', 'ITO Höhe roh',
+        'sigma Faltung', 'P/ITO Intensitätsverhältnis', 'ILO Halbwertsbreite',
+        'T', 'Delta T', 'BTO_pos', 'ITO_pos'
+    ])
     for i in range(len(dateien)):
-        writer.writerow([dateien[i], Intvers[i], ITO_FWHMs[i],
-                         sigma_faltungs[i], P_Intvers[i],
-                         ILO_Halbwertsbreite[i], T[i], Terr[i]])
+        writer.writerow([
+            dateien[i], Intvers[i], ITO_FWHMs[i], sigma_faltungs[i],
+            P_Intvers[i], ILO_Halbwertsbreite[i], T[i], Terr[i], x0_BTO[i],
+            x0_ITO[i]
+        ])
     f.close()
 
     # Wechsle zurück in den ursprünglichen Ordner
