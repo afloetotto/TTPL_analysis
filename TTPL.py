@@ -141,7 +141,7 @@ def maxwellboltzmann_wurz(x, Amp, sigma, x0, sigma_faltung=-1):
         einer Gaußfunktion gefaltet. sigma_faltung entspricht der
         Standardabweichungen dieser Gaußfunktion.
     '''
-    sigma = sigma / 3.4
+    sigma = sigma / 1.795
     x0 = x0 - sigma / 2
 
     n = len(x)
@@ -734,13 +734,14 @@ def einzelnes_spektrum(datei,
         if ITO_Linie:
             ITO_Halbwertsbreite = abs(peakbreiten[ITO_index])
             if peakarten[ITO_index] in ['S', 'Q', 'W']:
-                T = sigmas[ITO_index] / 3.4 / constants.Boltzmann * constants.e
+                ITO_Halbwertsbreite_fit = sigmas[ITO_index]
+                T = sigmas[ITO_index] / 1.795 / constants.Boltzmann * constants.e
                 Terr = sigmas_err[
-                    ITO_index] / 3.4 / constants.Boltzmann * constants.e
+                    ITO_index] / 1.795 / constants.Boltzmann * constants.e
             else:
-                T = ITO_Halbwertsbreite / 1.8 / constants.Boltzmann * constants.e
+                T = ITO_Halbwertsbreite / 1.795 / constants.Boltzmann * constants.e
                 Terr = sigmas_err[
-                    ITO_index] / 1.8 / constants.Boltzmann * constants.e
+                    ITO_index] / 1.795 / constants.Boltzmann * constants.e
         else:
             ITO_Halbwertsbreite = 0
             T = -1
@@ -762,6 +763,7 @@ def einzelnes_spektrum(datei,
             P_Intvers = 0
 
     # Kalibriere die Energie-Achse des Spektrums mithilfe der Vergleichswerte
+    ########### WICHTIG: nach der Kalibrierung müssen die Ergebnisse evtl. korrigiert werden ##############
     if len(peakpos_vergleich) > 1:
         slope, intercept = TTPL_Kalibrierung.kalibrier(x0s,
                                                        peakpos_vergleich,
@@ -770,6 +772,8 @@ def einzelnes_spektrum(datei,
         E = [slope * ele + intercept for ele in E]
         x0s = [slope * ele + intercept for ele in x0s]
         sigmas = [slope * ele for ele in sigmas]
+        ITO_Halbwertsbreite *= slope
+        ITO_Halbwertsbreite_fit *= slope
         Delta *= slope
         T *= slope
         T_FWHM *= slope
@@ -894,7 +898,7 @@ def einzelnes_spektrum(datei,
         df['Temperatur'] = [T] * len(E)
         df.to_csv(fname + '_Daten.csv', index=False)
 
-    return Intver, ITO_Peakheight_roh, sigma_faltung, P_Intvers, ILO_Halbwertsbreite, T, Terr, x0_BTO, x0_ITO
+    return Intver, ITO_Peakheight_roh, sigma_faltung, P_Intvers, ITO_Halbwertsbreite, T, Terr, x0_BTO, x0_ITO, ITO_Halbwertsbreite_fit
 
 
 def test_filetype(ftype):
@@ -994,11 +998,12 @@ def auswertung(ordner, parameter):
     ITO_FWHMs = np.zeros(n)
     sigma_faltungs = np.zeros(n)
     P_Intvers = np.zeros(n)
-    ILO_Halbwertsbreite = np.zeros(n)
+    ITO_Halbwertsbreite = np.zeros(n)
     T = np.zeros(n)
     Terr = np.zeros(n)
     x0_BTO = np.zeros(n)
     x0_ITO = np.zeros(n)
+    ITO_Halbwertsbreite_fit = np.zeros(n)
 
     for i in range(n):
         dmy = einzelnes_spektrum(dateien[i],
@@ -1025,11 +1030,12 @@ def auswertung(ordner, parameter):
         ITO_FWHMs[i] = dmy[1]
         sigma_faltungs[i] = dmy[2]
         P_Intvers[i] = dmy[3]
-        ILO_Halbwertsbreite[i] = dmy[4]
+        ITO_Halbwertsbreite[i] = dmy[4]
         T[i] = dmy[5]
         Terr[i] = dmy[6]
         x0_BTO[i] = dmy[7]
         x0_ITO[i] = dmy[8]
+        ITO_Halbwertsbreite_fit[i] = dmy[9]
 
     # Speichere die Ergebnisse in einer csv-Datei:
     AuswertungFname = os.path.basename(ordner) + '_Auswertung.csv'
@@ -1037,14 +1043,14 @@ def auswertung(ordner, parameter):
     writer = csv.writer(f, lineterminator='\n', delimiter=';')
     writer.writerow([
         'Datei', 'BTO/ITO Intensitätsverhältnis', 'ITO Höhe roh',
-        'sigma Faltung', 'P/ITO Intensitätsverhältnis', 'ILO Halbwertsbreite',
-        'T', 'Delta T', 'BTO_pos', 'ITO_pos'
+        'sigma Faltung', 'P/ITO Intensitätsverhältnis', 'ITO Halbwertsbreite',
+        'T', 'Delta T', 'BTO_pos', 'ITO_pos', 'ITO Halbwertsbreite fit'
     ])
     for i in range(len(dateien)):
         writer.writerow([
             dateien[i], Intvers[i], ITO_FWHMs[i], sigma_faltungs[i],
-            P_Intvers[i], ILO_Halbwertsbreite[i], T[i], Terr[i], x0_BTO[i],
-            x0_ITO[i]
+            P_Intvers[i], ITO_Halbwertsbreite[i], T[i], Terr[i], x0_BTO[i],
+            x0_ITO[i], ITO_Halbwertsbreite_fit[i]
         ])
     f.close()
 
