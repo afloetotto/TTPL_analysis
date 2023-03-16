@@ -349,7 +349,8 @@ def einzelnes_spektrum(datei,
         roi : List
         Position in eV, die bei der Baselinekorrektur mit Geraden verbunden
         sollen (Siehe docstring sowie baseline_ASTM.base() sowie die
-        ASTM-Vorschrift zu TTPL-Spektroskopie)
+        ASTM-Vorschrift zu TTPL-Spektroskopie). Falls roi = None wird die Baselinekorrektur
+        übersprungen.
 
         P_pos : Float
         Position der P-Linie in eV. Falls das Spektrum keine P-Linie enthält
@@ -447,8 +448,9 @@ def einzelnes_spektrum(datei,
     E, I = TTPL_import.read_file(datei, E_int=E_int)
 
     # Entferne die Baseline
-    base = baseline_ASTM.base(E, I, roi, fenster=roi_fenster)
-    I = I - base
+    if roi != None:
+        base = baseline_ASTM.base(E, I, roi, fenster=roi_fenster)
+        I = I - base
 
     # Glätte das Spektrum
     if smooth != None:
@@ -778,15 +780,17 @@ def einzelnes_spektrum(datei,
         T *= slope
         T_FWHM *= slope
         sigma_faltung *= slope
-        if ITO_Linie: x0_ITO = x0s[ITO_index]
-        else: x0_ITO = -1
-        if BTO_Linie: x0_BTO = x0s[BTO_index]
-        else: x0_BTO = -1
     else:
         warnings.warn(
             datei +
             ': Es konnte keine Kalibrierung durchgefuehrt werden, weil nicht mindestens 2 Peaks nahe der angegeben Werte gefunden wurden.'
         )
+
+    # Speichere die Peak-Positionen
+    if ITO_Linie: x0_ITO = x0s[ITO_index]
+    else: x0_ITO = -1
+    if BTO_Linie: x0_BTO = x0s[BTO_index]
+    else: x0_BTO = -1
 
     # Vergleiche das T aus dem Fit mit dem T aus der FWHM
     abweichung = 10  # in %
